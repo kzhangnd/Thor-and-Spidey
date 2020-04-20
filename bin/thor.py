@@ -32,15 +32,21 @@ def hammer(url, throws, verbose, hid):
 
     for i in range(throws):
         start_time = time.time()
-        results = requests.get(url)
+        response = requests.get(url)
         end_time = time.time()
         duration = end_time - start_time
         sum += duration
+
+        # If we need to print out the response txt
         if verbose:
-            print(results.text)
+            print(response.text)
+
+        # Print out the elapsed time of a single throw
         print('Hammer:  {}, Throw:   {}, Elapsed Time: {:.2f}'.format(hid, i, duration))
 
+    # Print out the averaged time of a hammer
     print('Hammer:  {}, AVERAGE   , Elapsed Time: {:.2f}'.format(hid, sum/throws))
+
     return sum/throws
 
 def do_hammer(args):
@@ -71,15 +77,17 @@ def main():
 
     if len(arguments):
         url = arguments.pop(0)
-    else:
+    else:   # If url is not provided
         usage(1)
 
-    # Create pool of workers and perform throws
-    args = ( (url, throws, verbose, hid) for hid in range(hammers))
+    # Use generator to make the arguements
+    args = ((url, throws, verbose, hid) for hid in range(hammers))
 
+    # Create pool of workers and perform throws
     with concurrent.futures.ProcessPoolExecutor(hammers) as executor:
         runtime = executor.map(do_hammer, args)
 
+    # Print out the total average time
     print('TOTAL AVERAGE ELAPSED TIME: {:.2f}'.format(sum(runtime)/hammers))
 
 
