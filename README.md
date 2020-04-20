@@ -4,10 +4,12 @@ This is the [Final Project] for [CSE 20289 Systems Programming (Spring 2020)].
 
 ## Members
 
-- Domer McDomerson (dmcdomer@nd.edu)
+- Kai Zhang (kzhang4@nd.edu)
+  Chang Zhou (czhou4@nd.edu)
 
 ## Demonstration
 
+  To be added later
 - [Link to Demonstration Video]()
 
 ## Errata
