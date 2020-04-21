@@ -50,14 +50,13 @@ int socket_listen(const char *port) {
         continue;
       }
 
-    	/* Listen to socket */
+      /* Listen to socket */
       if (listen(socket_fd, SOMAXCONN) < 0) {
         fprintf(stderr, "listen failed: %s\n", strerror(errno));
         close(socket_fd);
         socket_fd = -1;
         continue;
       }
-
     }
 
     freeaddrinfo(results);
