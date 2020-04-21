@@ -103,7 +103,7 @@ char * skip_nonwhitespace(char *s) {
  * @return  Point to first non-whitespace character in s.
  **/
 char * skip_whitespace(char *s) {
-    while (*s == ' ' || *s == '\t' || *s == '\n')
+    while (*s != '\0' && (*s == ' ' || *s == '\t' || *s == '\n'))
         s++;
 
     return s;
