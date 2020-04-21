@@ -248,10 +248,31 @@ int parse_request_headers(Request *r) {
     char buffer[BUFSIZ];
     char *name;
     char *data;
+    char *split_point;
 
     /* Parse headers from socket */
     while (fgets(buffer, BUFSIZ, r->stream) && strlen(buffer) > 2) {
+        split_point = strchr(buffer, ':');
 
+        if (split_point == NULL)
+            continue;
+
+        *split_point = '\0';
+        name = skip_whitespace(buffer);
+        data = chomp(split_point + 1);
+
+        Header *new_header = calloc(1, sizeof(Header));
+        new_header->name = strdup(name);
+        new_header>data = strdup(data);
+
+        if (r->headers != NULL) {
+            char *h = r->headers;
+            while (h->next != NULL)
+                h = h->next;
+            h->next = new_header;
+        }
+        else
+            r->headers = new_header;
     }
 
 #ifndef NDEBUG
