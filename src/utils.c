@@ -63,7 +63,23 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    return NULL;
+    /* Allocate space for the combination of RootPath and uri*/
+    char *dest = calloc((strlen(RootPath) + strlen(uri) + 1), sizeof(char));
+    if (!dest) {
+        debug("Unable to allocate relative pull path: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    /* Convert to the real path*/
+    char *path = realpath(strcat(strcat(dest, RootPath), uri), NULL);
+    free(dest); // free the relative full path
+    if (!path)
+        return NULL;
+
+    if (strncmp(path, uri, strlen(uri)) != 0)
+        return NULL;
+
+    return path;
 }
 
 /**
@@ -83,7 +99,10 @@ const char * http_status_string(Status status) {
         "418 I'm A Teapot",
     };
 
-    return NULL;
+    if (status < (sizeof(StatusStrings) / sizeof(char *)))
+        return StatusStrings[status];
+    else
+        return NULL;
 }
 
 /**
