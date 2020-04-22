@@ -44,13 +44,12 @@ Status  handle_request(Request *r) {
         return HTTP_STATUS_NOT_FOUND;
     }
 
-    if (S_ISREG(s.st_mode))
+    if (S_ISREG(s.st_mode) == 0)
         result = handle_browse_request(r);
     else if (access(r->path, X_OK) == 0)
         result = handle_cgi_request(r);
     else if (access(r->path, R_OK) == 0)
         result = handle_file_request(r);
-
 
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
 
@@ -69,14 +68,32 @@ Status  handle_request(Request *r) {
  * with HTTP_STATUS_NOT_FOUND.
  **/
 Status  handle_browse_request(Request *r) {
+    debug("Handle browse request");
     struct dirent **entries;
     int n;
 
     /* Open a directory for reading or scanning */
+ 	n = scandir(r->path, &entries, NULL, alphasort);
+ 	if (n < 0) {
+     	debug("scandir: %s\n", strerror(errno));
+        return HTTP_STATUS_NOT_FOUND;
+ 	}
 
     /* Write HTTP Header with OK Status and text/html Content-Type */
+    fprintf(r->stream, "HTTP/1.0 200 OK\n");
+    fprintf(r->stream, "Content-Type: text/html\n");
+    fprintf(r->stream, "\r\n");
 
     /* For each entry in directory, emit HTML list item */
+    fprintf(r->stream, "<ul>");
+    for (int i = 0; i < n; i++) {
+        if (streq(entries[i]->d_name, "."))
+            continue;
+    	fprintf(r->stream, "<li>%s</li>", entries[i]->d_name);
+     	free(entries[i]);
+ 	}
+    fprintf(r->stream, "</ul>");
+ 	free(entries);
 
     /* Return OK */
     return HTTP_STATUS_OK;
@@ -100,18 +117,39 @@ Status  handle_file_request(Request *r) {
     size_t nread;
 
     /* Open file for reading */
+    fs = fopen(r->path, "r");
+    if (!fs) {
+    	debug("fopen: %s\n", strerror(errno));
+    	goto fail;
+    }
 
     /* Determine mimetype */
+    mimetype = determine_mimetype(r->path);
 
     /* Write HTTP Headers with OK status and determined Content-Type */
+    fprintf(r->stream, "HTTP/1.0 200 OK\n");
+    fprintf(r->stream, "Content-Type: %s\n", mimetype);
+    fprintf(r->stream, "\r\n");
 
     /* Read from file and write to socket in chunks */
+    while ((nread = fread(buffer, 1, BUFSIZ, fs)) > 0) {
+    	if (fwrite(buffer, 1, nread, r->stream) < nread) {
+            debug("Write file to socket fail");
+            goto fail;
+        }
+    }
 
     /* Close file, deallocate mimetype, return OK */
+    fclose(fs);
+    free(mimetype);
     return HTTP_STATUS_OK;
 
 fail:
     /* Close file, free mimetype, return INTERNAL_SERVER_ERROR */
+    if (fs)
+        fclose(fs);
+    if (mimetype)
+        free(mimetype);
     return HTTP_STATUS_INTERNAL_SERVER_ERROR;
 }
 
