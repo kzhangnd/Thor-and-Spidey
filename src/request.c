@@ -34,6 +34,10 @@ Request * accept_request(int sfd) {
 
     /* Allocate request struct (zeroed) */
     r = calloc(1, sizeof(Request));
+    if (!r) {
+        debug("Unable to allocate request: %s\n", strerror(errno));
+        goto fail;
+    }
 
     /* Accept a client */
     r->fd = accept(sfd, &raddr, &rlen);
@@ -43,7 +47,8 @@ Request * accept_request(int sfd) {
     }
 
     /* Lookup client information */
-    if (getnameinfo(&raddr, rlen, r->host, NI_MAXHOST, r->port, NI_MAXSERV, NI_NAMEREQD) < 0) {
+    int status = getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV);
+    if (status < 0) {
         debug("Unable to lookup client information: %s\n", strerror(errno));
         goto fail;
     }
@@ -184,6 +189,10 @@ int parse_request_method(Request *r) {
     method = strtok(skip_whitespace(buffer), WHITESPACE);
     uri = strtok(NULL, WHITESPACE);
 
+    if (!method || !uri) {
+        goto fail;
+    }
+
     /* Parse query from uri */
     char *split_point = strchr(uri, '?');
     if (split_point != NULL) {
@@ -250,7 +259,7 @@ int parse_request_headers(Request *r) {
 
         if (split_point == NULL)
         {
-            debug("Farse headers fail\n");
+            debug("Farsing headers fail\n");
             goto fail;
         }
 
@@ -260,6 +269,11 @@ int parse_request_headers(Request *r) {
         data = skip_whitespace(split_point + 1);
 
         Header *new_header = calloc(1, sizeof(Header));
+        if (!new_header) {
+            debug("Unable to allocate Header struct: %s\n", strerror(errno));
+            goto fail;
+        }
+
         new_header->name = strdup(name);
         new_header->data = strdup(data);
 
