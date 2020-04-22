@@ -41,7 +41,7 @@ Status  handle_request(Request *r) {
     struct stat s;
     if (stat(r->path, &s) < 0) {
         debug("File path doesn't exist: %s", strerror(errno));
-        return HTTP_STATUS_NOT_FOUND;
+        return handle_error(r, HTTP_STATUS_NOT_FOUND);
     }
 
     if (S_ISREG(s.st_mode) == 0)
@@ -53,7 +53,10 @@ Status  handle_request(Request *r) {
 
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
 
-    return result;
+    if (result != HTTP_STATUS_OK)
+        return handle_error(r, result);
+    else
+        return result;
 }
 
 /**
@@ -85,11 +88,11 @@ Status  handle_browse_request(Request *r) {
     fprintf(r->stream, "\r\n");
 
     /* For each entry in directory, emit HTML list item */
-    fprintf(r->stream, "<ul>");
+    fprintf(r->stream, "<ul>\n");
     for (int i = 0; i < n; i++) {
         if (streq(entries[i]->d_name, "."))
             continue;
-    	fprintf(r->stream, "<li>%s</li>", entries[i]->d_name);
+    	fprintf(r->stream, "<li>%s</li>\n", entries[i]->d_name);
      	free(entries[i]);
  	}
     fprintf(r->stream, "</ul>");
@@ -224,6 +227,7 @@ Status  handle_cgi_request(Request *r) {
  **/
 Status  handle_error(Request *r, Status status) {
     const char *status_string = http_status_string(status);
+    debug("Error type: %s", status_string);
 
     /* Write HTTP Header */
     fprintf(r->stream, "HTTP/1.0 200 OK\n");
@@ -231,7 +235,7 @@ Status  handle_error(Request *r, Status status) {
     fprintf(r->stream, "\r\n");
 
     /* Write HTML Description of Error*/
-    fprintf(r->stream, "<h1>%s</h1>", status_string);
+    fprintf(r->stream, "<h1>%s</h1>\n", status_string);
 
     /* Return specified status */
     return status;
