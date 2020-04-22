@@ -194,19 +194,18 @@ int parse_request_method(Request *r) {
     }
 
     /* Parse query from uri */
-    char *split_point = strchr(uri, '?');
-    if (split_point != NULL) {
-        query = split_point + 1;
-        *split_point = '\0';
+    query = strchr(uri, '?');
+    if (!query) {
+        query = "";
     }
-    else
-        query = NULL;
+    else {
+        *(query++) = '\0';
+    }
 
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);
     r->uri = strdup(uri);
-    if (query != NULL)
-        r->query = strdup(query);
+    r->query = strdup(query);
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
