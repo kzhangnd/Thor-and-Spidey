@@ -38,23 +38,20 @@ Request * accept_request(int sfd) {
     /* Accept a client */
     r->fd = accept(sfd, &raddr, &rlen);
     if (r->fd < 0) {
-        fprintf(stderr, "Unable to accept: %s\n", strerror(errno));
+        debug("Unable to accept: %s\n", strerror(errno));
         goto fail;
     }
 
     /* Lookup client information */
-    r->host = malloc(sizeof(char) * NI_MAXHOST);    // allocate space for host[] and port[]
-    r->port = malloc(sizeof(char) * NI_MAXSERV);
-
-    if (getnameinfo(&raddr, rlen, r->host, NI_MAXHOST, r->port, NI_MAXSERV) < 0) {
-        fprintf(stderr, "Unable to lookup client information: %s\n", strerror(errno));
+    if (getnameinfo(&raddr, rlen, r->host, NI_MAXHOST, r->port, NI_MAXSERV, NI_NAMEREQD) < 0) {
+        debug("Unable to lookup client information: %s\n", strerror(errno));
         goto fail;
     }
 
     /* Open socket stream */
-    r->stream = fdopen(client_fd, "w+");
+    r->stream = fdopen(r->fd, "w+");
     if (!r->stream) {
-        fprintf(stderr, "fdopen failed: %s\n", strerror(errno));
+        debug("fdopen failed: %s\n", strerror(errno));
         goto fail;
     }
 
@@ -112,7 +109,7 @@ void free_request(Request *r) {
     if (r->stream)
         fclose(r->stream);
     if (r->fd)
-        close(f->fd);
+        close(r->fd);
 
     /* Free allocated strings */
     if (r->method)
@@ -123,10 +120,6 @@ void free_request(Request *r) {
         free(r->path);
     if (r->query)
         free(r->query);
-    if (r->host)
-        free(r->host);
-    if (r->port)
-        free(r->port);
 
     /* Free headers */
     if (r->headers)
@@ -181,7 +174,7 @@ int parse_request_method(Request *r) {
     char *query;
 
     /* Read line from socket */
-    if (!fgets(buffer, BUFSIZ, client_file))
+    if (!fgets(buffer, BUFSIZ, r->stream))
     {
         debug("fgets failed");
         goto fail;
@@ -252,21 +245,26 @@ int parse_request_headers(Request *r) {
 
     /* Parse headers from socket */
     while (fgets(buffer, BUFSIZ, r->stream) && strlen(buffer) > 2) {
+        chomp(buffer);
         split_point = strchr(buffer, ':');
 
         if (split_point == NULL)
-            continue;
+        {
+            debug("Farse headers fail\n");
+            goto fail;
+        }
+
 
         *split_point = '\0';
         name = skip_whitespace(buffer);
-        data = chomp(split_point + 1);
+        data = skip_whitespace(split_point + 1);
 
         Header *new_header = calloc(1, sizeof(Header));
         new_header->name = strdup(name);
-        new_header>data = strdup(data);
+        new_header->data = strdup(data);
 
         if (r->headers != NULL) {
-            char *h = r->headers;
+            Header *h = r->headers;
             while (h->next != NULL)
                 h = h->next;
             h->next = new_header;
