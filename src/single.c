@@ -18,22 +18,22 @@ int single_server(int sfd) {
     Status result;
     /* Accept and handle HTTP request */
     while (true) {
-      /* Accept request */
-      debug("Accepting Request");
-      r = accept_request(sfd);
+        /* Accept request */
+        debug("Accepting Request");
+        r = accept_request(sfd);
 
-      /* Handle request */
-      debug("Handling Request");
-      result = handle_request();
+        /* Handle request */
+        debug("Handling Request");
+        //result = handle_request();
 
-      /* Free request */
-      debug("Freeing Request");
-      free_request(r);
+        /* Free request */
+        debug("Freeing Request");
+        free_request(r);
     }
 
     /* Close server socket */
-    if (close(sfd) < 0){
-      fprintf(stderr, "close socket failed: %s\n", strerror(status));
+    if (close(sfd) < 0) {
+        debug("close socket failed");
     }
 
     return EXIT_SUCCESS;

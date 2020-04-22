@@ -23,27 +23,27 @@ int forking_server(int sfd) {
     /* Accept and handle HTTP request */
     while (true) {
     	/* Accept request */
-      debug("Accepting Request");
-      r = accept_request(sfd);
+        debug("Accepting Request");
+        r = accept_request(sfd);
 
-      /* Ignore children */
-      pid_t pid = fork();
-      if (pid < 0){
-        debug("fork failed: %s", strerror(errno));
-        free_request(r);
-        continue;
-      }
-
-      /* Fork off child process to handle request */
-      if (pid == 0){                // Child
-        if (close(sfd) < 0){
-          fprintf(stderr, "close socket failed: %s\n", strerror(status));
+        /* Ignore children */
+        pid_t pid = fork();
+        if (pid < 0) {
+            debug("fork failed: %s", strerror(errno));
+            free_request(r);
+            continue;
         }
-        debug("Handling Request");
-        result = handle_request();
-        exit(EXIT_SUCCESS);
+
+        /* Fork off child process to handle request */
+        if (pid == 0) {                // Child
+            if (close(sfd) < 0) {
+            debug("close socket failed: %s\n");
+            }
+            debug("Handling Request");
+            //result = handle_request();
+            exit(EXIT_SUCCESS);
       }
-      else{                          // Parent
+      else {                          // Parent
         free_request(r);
       }
 
