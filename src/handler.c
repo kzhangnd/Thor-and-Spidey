@@ -31,11 +31,27 @@ Status  handle_request(Request *r) {
     Status result;
 
     /* Parse request */
+    parse_request(r);
 
     /* Determine request path */
+    r->path = determine_request_path(r->uri);
     debug("HTTP REQUEST PATH: %s", r->path);
 
     /* Dispatch to appropriate request handler type based on file type */
+    struct stat s;
+    if (stat(r->path, &s) < 0) {
+        debut("File path doesn't exist: %s", strerror(errno));
+        handle_error(r, HTTP_STATUS_NOT_FOUND);
+    }
+
+    if (S_ISREG(s.st_mode))
+        result = handle_browse_request(r);
+    else if (access(r->path, X_OK) == 0)
+        result = handle_cgi_request(r);
+    else if (access(r->path, R_OK) == 0)
+        result = handle_file_request(r);
+
+
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
 
     return result;
