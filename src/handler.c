@@ -40,8 +40,8 @@ Status  handle_request(Request *r) {
     /* Dispatch to appropriate request handler type based on file type */
     struct stat s;
     if (stat(r->path, &s) < 0) {
-        debut("File path doesn't exist: %s", strerror(errno));
-        handle_error(r, HTTP_STATUS_NOT_FOUND);
+        debug("File path doesn't exist: %s", strerror(errno));
+        return HTTP_STATUS_NOT_FOUND;
     }
 
     if (S_ISREG(s.st_mode))
