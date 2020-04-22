@@ -68,7 +68,7 @@ Status  handle_request(Request *r) {
  * with HTTP_STATUS_NOT_FOUND.
  **/
 Status  handle_browse_request(Request *r) {
-    debug("Handle browse request");
+    log("Handling browse request");
     struct dirent **entries;
     int n;
 
@@ -111,6 +111,7 @@ Status  handle_browse_request(Request *r) {
  * HTTP_STATUS_NOT_FOUND.
  **/
 Status  handle_file_request(Request *r) {
+    log("Handling file request");
     FILE *fs;
     char buffer[BUFSIZ];
     char *mimetype = NULL;
@@ -132,11 +133,10 @@ Status  handle_file_request(Request *r) {
     fprintf(r->stream, "\r\n");
 
     /* Read from file and write to socket in chunks */
-    while ((nread = fread(buffer, 1, BUFSIZ, fs)) > 0) {
-    	if (fwrite(buffer, 1, nread, r->stream) < nread) {
-            debug("Write file to socket fail");
-            goto fail;
-        }
+    nread = fread(buffer, 1, BUFSIZ, fs);
+    while (nread > 0) {
+        fwrite(buffer, 1, nread, r->stream);
+        nread = fread(buffer, 1, BUFSIZ, fs);
     }
 
     /* Close file, deallocate mimetype, return OK */
@@ -171,14 +171,45 @@ Status  handle_cgi_request(Request *r) {
 
     /* Export CGI environment variables from request:
      * http://en.wikipedia.org/wiki/Common_Gateway_Interface */
+    setenv("DOCUMENT_ROOT", RootPath, 1);
+    setenv("QUERY_STRING", r->query, 1);
+    setenv("REMOTE_ADDR", r->host, 1);
+    setenv("REMOTE_PORT", r->port, 1);
+    setenv("REQUEST_METHOD", r->method, 1);
+    setenv("REQUEST_URI", r->uri, 1);
+    setenv("SCRIPT_FILENAME", r->path, 1);
+    setenv("SERVER_PORT", Port, 1);
 
     /* Export CGI environment variables from request headers */
+    for (Header *header = r->headers; header; header = header->next) {
+    	if (streq(header->name, "Host"))
+            setenv("HTTP_HOST", header->data, 1);
+        else if (streq(header->name, "Accept"))
+            setenv("HTTP_ACCEPT", header->data, 1);
+        else if (streq(header->name, "Accept-Language"))
+            setenv("HTTP_ACCEPT_LANGUAGE", header->data, 1);
+        else if (streq(header->name, "Accept-Encoding"))
+            setenv("HTTP_ACCEPT_ENCODING", header->data, 1);
+        else if (streq(header->name, "Connection"))
+            setenv("HTTP_CONNECTION", header->data, 1);
+        else if (streq(header->name, "User-Agent"))
+            setenv("HTTP_USER_AGENT", header->data, 1);
+    }
 
     /* POpen CGI Script */
+    pfs = popen(r->path, "r");
+    if (!pfs) {
+        debug("Unable to popen CGI Scipt: %s", strerror(errno));
+        return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    }
 
     /* Copy data from popen to socket */
+    while (fgets(buffer, BUFSIZ, pfs)) {
+        fputs(buffer, r->stream);
+    }
 
     /* Close popen, return OK */
+    fclose(pfs);
     return HTTP_STATUS_OK;
 }
 
@@ -195,8 +226,12 @@ Status  handle_error(Request *r, Status status) {
     const char *status_string = http_status_string(status);
 
     /* Write HTTP Header */
+    fprintf(r->stream, "HTTP/1.0 200 OK\n");
+    fprintf(r->stream, "Content-Type: text/html\n");
+    fprintf(r->stream, "\r\n");
 
     /* Write HTML Description of Error*/
+    fprintf(r->stream, "<h1>%s</h1>", status_string);
 
     /* Return specified status */
     return status;
