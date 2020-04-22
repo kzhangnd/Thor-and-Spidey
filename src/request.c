@@ -179,8 +179,7 @@ int parse_request_method(Request *r) {
     char *query;
 
     /* Read line from socket */
-    if (!fgets(buffer, BUFSIZ, r->stream))
-    {
+    if (!fgets(buffer, BUFSIZ, r->stream)) {
         debug("fgets failed");
         goto fail;
     }
@@ -249,41 +248,36 @@ int parse_request_headers(Request *r) {
     char buffer[BUFSIZ];
     char *name;
     char *data;
-    char *split_point;
 
     /* Parse headers from socket */
     while (fgets(buffer, BUFSIZ, r->stream) && strlen(buffer) > 2) {
         chomp(buffer);
-        split_point = strchr(buffer, ':');
-
-        if (split_point == NULL)
-        {
-            debug("Farsing headers fail\n");
+        data = strchr(buffer, ':');
+        if (!data) {
+            debug("Farsing headers fail");
             goto fail;
         }
 
-
-        *split_point = '\0';
+        *(data++) = '\0';
         name = skip_whitespace(buffer);
-        data = skip_whitespace(split_point + 1);
 
-        Header *new_header = calloc(1, sizeof(Header));
-        if (!new_header) {
+        curr = calloc(1, sizeof(Header));
+        if (!curr) {
             debug("Unable to allocate Header struct: %s\n", strerror(errno));
             goto fail;
         }
 
-        new_header->name = strdup(name);
-        new_header->data = strdup(data);
+        curr->name = strdup(name);
+        curr->data = strdup(data);
 
         if (r->headers != NULL) {
             Header *h = r->headers;
             while (h->next != NULL)
                 h = h->next;
-            h->next = new_header;
+            h->next = curr;
         }
         else
-            r->headers = new_header;
+            r->headers = curr;
     }
 
 #ifndef NDEBUG
