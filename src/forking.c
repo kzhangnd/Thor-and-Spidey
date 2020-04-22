@@ -36,20 +36,27 @@ int forking_server(int sfd) {
 
         /* Fork off child process to handle request */
         if (pid == 0) {                // Child
-            if (close(sfd) < 0) {
-            debug("close socket failed: %s\n");
-            }
+            close(sfd);
+
+            /* Handle request */
             debug("Handling Request");
-            //result = handle_request();
+            result = handle_request(r);
+            if (result != HTTP_STATUS_OK)
+                log("Unable to handle request");
+
+            /* Free request */
+            debug("Freeing Request");
+            free_request(r);
             exit(EXIT_SUCCESS);
-      }
-      else {                          // Parent
-        free_request(r);
-      }
+        }
+        else {                          // Parent
+            free_request(r);
+        }
 
     }
 
     /* Close server socket */
+    close(sfd);
     return EXIT_SUCCESS;
 }
 

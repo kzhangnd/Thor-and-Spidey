@@ -21,10 +21,17 @@ int single_server(int sfd) {
         /* Accept request */
         debug("Accepting Request");
         r = accept_request(sfd);
+        if (!r)
+        {
+            debug("Unable to accept request");
+            continue;
+        }
 
         /* Handle request */
         debug("Handling Request");
-        //result = handle_request();
+        result = handle_request(r);
+        if (result != HTTP_STATUS_OK)
+            log("Unable to handle request");
 
         /* Free request */
         debug("Freeing Request");
@@ -32,10 +39,7 @@ int single_server(int sfd) {
     }
 
     /* Close server socket */
-    if (close(sfd) < 0) {
-        debug("close socket failed");
-    }
-
+    close(sfd);
     return EXIT_SUCCESS;
 }
 
