@@ -39,10 +39,33 @@ char * determine_mimetype(const char *path) {
     FILE *fs = NULL;
 
     /* Find file extension */
+    ext = strrchr(path, '.');
+    if (!ext)
+        return NULL;
+    ext += 1;
 
     /* Open MimeTypesPath file */
+    fs = fopen(MimeTypesPath, "r");
+    if (!fs) {
+    	debug("fopen: %s\n", strerror(errno));
+    	return NULL;
+    }
 
     /* Scan file for matching file extensions */
+    while (fgets(buffer, BUFSIZ, fs)) {
+        mimetype = strtok(buffer, WHITESPACE);
+        //buffer = skip_whitespace(skip_nonwhitespace(buffer));
+        //token = strtok(buffer, WHITESPACE);
+        //if (streq(token, ext))
+        //    return strdup(mimetype);
+        while ((token = strtok(NULL, WHITESPACE)) != NULL) {
+            if (streq(token, ext)) {
+                fclose(fs);
+                return strdup(mimetype);
+            }
+        }
+    }
+
     return NULL;
 }
 
@@ -72,11 +95,12 @@ char * determine_request_path(const char *uri) {
 
     /* Convert to the real path*/
     char *path = realpath(strcat(strcat(dest, RootPath), uri), NULL);
-    free(dest); // free the relative full path
+    debug("Full Path = %s", path);
+    free(dest);
     if (!path)
         return NULL;
 
-    if (strncmp(path, uri, strlen(uri)) != 0)
+    if (strncmp(path, RootPath, strlen(RootPath)) != 0)
         return NULL;
 
     return path;
@@ -112,6 +136,9 @@ const char * http_status_string(Status status) {
  * @return  Point to first whitespace character in s.
  **/
 char * skip_nonwhitespace(char *s) {
+    while (*s != '\0' && !(*s == ' ' || *s == '\t' || *s == '\n'))
+        s++;
+
     return s;
 }
 
