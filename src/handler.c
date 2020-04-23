@@ -31,10 +31,17 @@ Status  handle_request(Request *r) {
     Status result;
 
     /* Parse request */
-    parse_request(r);
+    if (parse_request(r) < 0) {
+        debug("Unable to parse request");
+        return handle_error(r, HTTP_STATUS_BAD_REQUEST);
+    }
 
     /* Determine request path */
     r->path = determine_request_path(r->uri);
+    if (!r->path) {
+        debug("Unable to determine full path");
+        return handle_error(r, HTTP_STATUS_NOT_FOUND);
+    }
     debug("HTTP REQUEST PATH: %s", r->path);
 
     /* Dispatch to appropriate request handler type based on file type */
@@ -88,14 +95,17 @@ Status  handle_browse_request(Request *r) {
     fprintf(r->stream, "\r\n");
 
     /* For each entry in directory, emit HTML list item */
-    fprintf(r->stream, "<ul>\n");
+    fprintf(r->stream, "<html>");
+    fprintf(r->stream, "<ul>");
+    fprintf(r->stream, "<body>");
     for (int i = 0; i < n; i++) {
-        if (streq(entries[i]->d_name, "."))
-            continue;
-    	fprintf(r->stream, "<li>%s</li>\n", entries[i]->d_name);
+        if (!streq(entries[i]->d_name, "."))
+            fprintf(r->stream, "<li>%s</li>", entries[i]->d_name);
      	free(entries[i]);
  	}
+    fprintf(r->stream, "</body>");
     fprintf(r->stream, "</ul>");
+    fprintf(r->stream, "</html>");
  	free(entries);
 
     /* Return OK */
@@ -230,7 +240,7 @@ Status  handle_error(Request *r, Status status) {
     debug("Error type: %s", status_string);
 
     /* Write HTTP Header */
-    fprintf(r->stream, "HTTP/1.0 200 OK\n");
+    fprintf(r->stream, "HTTP/1.0 %s\n", status_string);
     fprintf(r->stream, "Content-Type: text/html\n");
     fprintf(r->stream, "\r\n");
 
