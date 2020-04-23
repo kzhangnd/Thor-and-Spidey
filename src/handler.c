@@ -95,17 +95,26 @@ Status  handle_browse_request(Request *r) {
     fprintf(r->stream, "\r\n");
 
     /* For each entry in directory, emit HTML list item */
-    fprintf(r->stream, "<html>");
-    fprintf(r->stream, "<ul>");
-    fprintf(r->stream, "<body>");
+    fprintf(r->stream, "<html>\n");
+    fprintf(r->stream, "<ul>\n");
+    fprintf(r->stream, "<body>\n");
+
+    char buffer[BUFSIZ];
     for (int i = 0; i < n; i++) {
-        if (!streq(entries[i]->d_name, "."))
-            fprintf(r->stream, "<li><a href=\"%s\">%s</a></li>\n", r->uri, entries[i]->d_name);
+        if (!streq(entries[i]->d_name, ".")) {
+            if (r->uri[strlen(r->uri) - 1] == '/')
+                sprintf(buffer, "%s%s", r->uri, entries[i]->d_name);
+            else
+                sprintf(buffer, "%s/%s", r->uri, entries[i]->d_name);
+            fprintf(r->stream, "<li><a href=\"%s\">%s</a></li>\n", buffer, entries[i]->d_name);
+        }
+
+
      	free(entries[i]);
  	}
-    fprintf(r->stream, "</body>");
-    fprintf(r->stream, "</ul>");
-    fprintf(r->stream, "</html>");
+    fprintf(r->stream, "</body>\n");
+    fprintf(r->stream, "</ul>\n");
+    fprintf(r->stream, "</html>\n");
  	free(entries);
 
     /* Return OK */
