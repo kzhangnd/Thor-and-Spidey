@@ -51,9 +51,11 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
 	    case 'c':
 	    	if (streq(argv[argind], "single")) {
 	    	    *mode = SINGLE;
-                } else if (streq(argv[argind], "forking")) {
+            }
+            else if (streq(argv[argind], "forking")) {
 	    	    *mode = FORKING;
-	    	} else {
+	    	}
+            else {
 	    	    return false;
 	    	}
 	    	argind++;
@@ -76,7 +78,7 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
 	    default:
 	        return false;
 	    	break;
-	}
+	    }
     }
 
     return true;
@@ -89,10 +91,14 @@ int main(int argc, char *argv[]) {
     ServerMode mode;
 
     /* Parse command line options */
+    if (!parse_options(argc, &argv[0], &mode))
+        usage(argv[0], EXIT_FAILURE);
 
     /* Listen to server socket */
+    int server_fd = socket_listen(Port);
 
     /* Determine real RootPath */
+    RootPath = realpath(RootPath, NULL);
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
     debug("MimeTypesPath   = %s", MimeTypesPath);
@@ -100,6 +106,8 @@ int main(int argc, char *argv[]) {
     debug("ConcurrencyMode = %s", mode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
+    int status = mode == SINGLE ? single_server(server_fd) : forking_server(server_fd);
+    free(RootPath);
     return status;
 }
 
