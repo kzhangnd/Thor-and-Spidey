@@ -41,14 +41,14 @@ char * determine_mimetype(const char *path) {
     /* Find file extension */
     ext = strrchr(path, '.');
     if (!ext)
-        return NULL;
+        return DefaultMimeType;
     ext += 1;
 
     /* Open MimeTypesPath file */
     fs = fopen(MimeTypesPath, "r");
     if (!fs) {
     	debug("fopen: %s\n", strerror(errno));
-    	return NULL;
+    	return DefaultMimeType;
     }
 
     /* Scan file for matching file extensions */
@@ -66,7 +66,7 @@ char * determine_mimetype(const char *path) {
         }
     }
 
-    return NULL;
+    return DefaultMimeType;
 }
 
 /**
