@@ -260,6 +260,7 @@ int parse_request_headers(Request *r) {
 
         *(data++) = '\0';
         name = skip_whitespace(buffer);
+        data = skip_whitespace(data);
 
         curr = calloc(1, sizeof(Header));
         if (!curr) {
