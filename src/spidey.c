@@ -48,37 +48,37 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
     while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-') {
         char *arg = argv[argind++];
     	switch (arg[1]) {
-	    case 'c':
-	    	if (streq(argv[argind], "single")) {
-	    	    *mode = SINGLE;
-            }
-            else if (streq(argv[argind], "forking")) {
-	    	    *mode = FORKING;
-	    	}
-            else {
-	    	    return false;
-	    	}
-	    	argind++;
-	    	break;
-	    case 'h':
-	    	usage(argv[0], EXIT_SUCCESS);
-	    	break;
-	    case 'm':
-	    	MimeTypesPath = argv[argind++];
-	    	break;
-	    case 'M':
-	    	DefaultMimeType = argv[argind++];
-	    	break;
-	    case 'p':
-	    	Port = argv[argind++];
-	    	break;
-	    case 'r':
-	    	RootPath = argv[argind++];
-	    	break;
-	    default:
-	        return false;
-	    	break;
-	    }
+    	    case 'c':
+    	    	if (streq(argv[argind], "single")) {
+    	    	    *mode = SINGLE;
+                }
+                else if (streq(argv[argind], "forking")) {
+    	    	    *mode = FORKING;
+    	    	}
+                else {
+    	    	    return false;
+    	    	}
+    	    	argind++;
+    	    	break;
+    	    case 'h':
+    	    	usage(argv[0], EXIT_SUCCESS);
+    	    	break;
+    	    case 'm':
+    	    	MimeTypesPath = argv[argind++];
+    	    	break;
+    	    case 'M':
+    	    	DefaultMimeType = argv[argind++];
+    	    	break;
+    	    case 'p':
+    	    	Port = argv[argind++];
+    	    	break;
+    	    case 'r':
+    	    	RootPath = argv[argind++];
+    	    	break;
+    	    default:
+    	        return false;
+    	    	break;
+        }
     }
 
     return true;
