@@ -16,13 +16,13 @@
 int single_server(int sfd) {
     Request *r;
     Status result;
+    
     /* Accept and handle HTTP request */
     while (true) {
         /* Accept request */
         debug("Accepting Request");
         r = accept_request(sfd);
-        if (!r)
-        {
+        if (!r) {
             debug("Unable to accept request");
             continue;
         }
