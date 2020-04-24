@@ -96,6 +96,10 @@ int main(int argc, char *argv[]) {
 
     /* Listen to server socket */
     int server_fd = socket_listen(Port);
+    if (server_fd < 0) {
+        log("Unable to bind Port: %s", Port);
+        return EXIT_FAILURE;
+    }
 
     /* Determine real RootPath */
     RootPath = realpath(RootPath, NULL);
