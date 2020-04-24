@@ -54,10 +54,6 @@ char * determine_mimetype(const char *path) {
     /* Scan file for matching file extensions */
     while (fgets(buffer, BUFSIZ, fs)) {
         mimetype = strtok(buffer, WHITESPACE);
-        //buffer = skip_whitespace(skip_nonwhitespace(buffer));
-        //token = strtok(buffer, WHITESPACE);
-        //if (streq(token, ext))
-        //    return strdup(mimetype);
         while ((token = strtok(NULL, WHITESPACE)) != NULL) {
             if (streq(token, ext)) {
                 fclose(fs);
@@ -86,17 +82,17 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    /* Allocate space for the combination of RootPath and uri*/
-    char *dest = calloc((strlen(RootPath) + strlen(uri) + 1), sizeof(char));
-    if (!dest) {
-        debug("Unable to allocate relative pull path: %s\n", strerror(errno));
-        return NULL;
-    }
+    //char *dest = calloc((strlen(RootPath) + strlen(uri) + 1), sizeof(char));
+    //if (!dest) {
+    //    debug("Unable to allocate relative pull path: %s\n", strerror(errno));
+    //    return NULL;
+    //}
+    char buffer[BUFSIZ];
+    sprintf(buffer, "%s%s", RootPath, uri);
 
     /* Convert to the real path*/
-    char *path = realpath(strcat(strcat(dest, RootPath), uri), NULL);
+    char *path = realpath(buffer, NULL);
     debug("Full Path = %s", path);
-    free(dest);
     if (!path)
         return NULL;
 
