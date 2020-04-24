@@ -83,11 +83,11 @@ Status  handle_browse_request(Request *r) {
     int n;
 
     /* Open a directory for reading or scanning */
- 	n = scandir(r->path, &entries, NULL, alphasort);
- 	if (n < 0) {
-     	debug("scandir: %s\n", strerror(errno));
+    n = scandir(r->path, &entries, NULL, alphasort);
+    if (n < 0) {
+        debug("scandir: %s\n", strerror(errno));
         return HTTP_STATUS_NOT_FOUND;
- 	}
+    }
 
     /* Write HTTP Header with OK Status and text/html Content-Type */
     fprintf(r->stream, "HTTP/1.0 200 OK\n");
@@ -108,14 +108,12 @@ Status  handle_browse_request(Request *r) {
                 sprintf(buffer, "%s/%s", r->uri, entries[i]->d_name);
             fprintf(r->stream, "<li><a href=\"%s\">%s</a></li>\n", buffer, entries[i]->d_name);
         }
-
-
      	free(entries[i]);
- 	}
+    }
     fprintf(r->stream, "</body>\n");
     fprintf(r->stream, "</ul>\n");
     fprintf(r->stream, "</html>\n");
- 	free(entries);
+    free(entries);
 
     /* Return OK */
     return HTTP_STATUS_OK;
