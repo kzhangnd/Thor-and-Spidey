@@ -25,6 +25,10 @@ int forking_server(int sfd) {
     	/* Accept request */
         debug("Accepting Request");
         r = accept_request(sfd);
+        if (!r) {
+            debug("Unable to accept request");
+            continue;
+        }
 
         /* Ignore children */
         signal(SIGCHLD, SIG_IGN);
@@ -40,7 +44,7 @@ int forking_server(int sfd) {
         if (pid == 0) {                // Child
             /* Close server socket */
             close(sfd);
-            
+
             /* Handle request */
             debug("Handling Request");
             result = handle_request(r);
@@ -50,6 +54,7 @@ int forking_server(int sfd) {
             /* Free request */
             debug("Freeing Request");
             free_request(r);
+            free(RootPath);
             exit(EXIT_SUCCESS);
         }
         else {                          // Parent
