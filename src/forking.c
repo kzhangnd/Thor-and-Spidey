@@ -27,6 +27,9 @@ int forking_server(int sfd) {
         r = accept_request(sfd);
 
         /* Ignore children */
+        signal(SIGCHLD, SIG_IGN);
+
+        /* Fork off child process to handle request */
         pid_t pid = fork();
         if (pid < 0) {
             debug("fork failed: %s", strerror(errno));
@@ -34,10 +37,10 @@ int forking_server(int sfd) {
             continue;
         }
 
-        /* Fork off child process to handle request */
         if (pid == 0) {                // Child
+            /* Close server socket */
             close(sfd);
-
+            
             /* Handle request */
             debug("Handling Request");
             result = handle_request(r);
