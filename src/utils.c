@@ -41,14 +41,14 @@ char * determine_mimetype(const char *path) {
     /* Find file extension */
     ext = strrchr(path, '.');
     if (!ext)
-        return DefaultMimeType;
+        return strdup(DefaultMimeType);
     ext += 1;
 
     /* Open MimeTypesPath file */
     fs = fopen(MimeTypesPath, "r");
     if (!fs) {
     	debug("fopen: %s\n", strerror(errno));
-    	return DefaultMimeType;
+    	return strdup(DefaultMimeType);
     }
 
     /* Scan file for matching file extensions */
@@ -62,7 +62,7 @@ char * determine_mimetype(const char *path) {
         }
     }
 
-    return DefaultMimeType;
+    return strdup(DefaultMimeType);
 }
 
 /**
@@ -82,17 +82,11 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    //char *dest = calloc((strlen(RootPath) + strlen(uri) + 1), sizeof(char));
-    //if (!dest) {
-    //    debug("Unable to allocate relative pull path: %s\n", strerror(errno));
-    //    return NULL;
-    //}
     char buffer[BUFSIZ];
     sprintf(buffer, "%s%s", RootPath, uri);
 
     /* Convert to the real path*/
     char *path = realpath(buffer, NULL);
-    debug("Full Path = %s", path);
     if (!path)
         return NULL;
 
