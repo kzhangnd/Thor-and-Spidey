@@ -94,10 +94,23 @@ Status  handle_browse_request(Request *r) {
     fprintf(r->stream, "Content-Type: text/html\n");
     fprintf(r->stream, "\r\n");
 
-    /* For each entry in directory, emit HTML list item */
+
     fprintf(r->stream, "<html>\n");
-    fprintf(r->stream, "<ul>\n");
+
+    /* Write head part*/
+    fprintf(r->stream, "<head>\n");
+    fprintf(r->stream, "<meta charset=\"utf-8\">\n");
+    fprintf(r->stream, "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
+    fprintf(r->stream, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n");
+    fprintf(r->stream, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css\" integrity=\"sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh\" crossorigin=\"anonymous\">");
+    fprintf(r->stream, "</head>\n");
+
+    /* For each entry in directory, emit HTML list item */
     fprintf(r->stream, "<body>\n");
+    fprintf(r->stream, "<div class=\"container\">\n");
+    fprintf(r->stream, "<div class=\"row\">\n");
+    fprintf(r->stream, "<div class=\"col-sm-4\">\n");
+    fprintf(r->stream, "<div class=\"list-group\">\n");
 
     char buffer[BUFSIZ];
     for (int i = 0; i < n; i++) {
@@ -106,12 +119,17 @@ Status  handle_browse_request(Request *r) {
                 sprintf(buffer, "%s%s", r->uri, entries[i]->d_name);
             else
                 sprintf(buffer, "%s/%s", r->uri, entries[i]->d_name);
-            fprintf(r->stream, "<li><a href=\"%s\">%s</a></li>\n", buffer, entries[i]->d_name);
+
+            if (streq(entries[i]->d_name, "..")){
+                fprintf(r->stream, "<a href=\"%s\" class=\"list-group-item list-group-item-action list-group-item-info\">%s</a>\n", buffer, entries[i]->d_name);
+            }
+            else
+                fprintf(r->stream, "<a href=\"%s\" class=\"list-group-item list-group-item-action list-group-item-primary\">%s</a>\n", buffer, entries[i]->d_name);
         }
      	free(entries[i]);
     }
+    fprintf(r->stream, "</div>\n");
     fprintf(r->stream, "</body>\n");
-    fprintf(r->stream, "</ul>\n");
     fprintf(r->stream, "</html>\n");
     free(entries);
 
@@ -243,16 +261,36 @@ Status  handle_cgi_request(Request *r) {
  * notify the user of the error.
  **/
 Status  handle_error(Request *r, Status status) {
-    const char *status_string = http_status_string(status);
+    char *status_string = (char *)http_status_string(status);
     debug("Error type: %s", status_string);
+
+    char *number = strdup(status_string);
+    char *word = strchr(number, ' ');
+    *(word++) = '\0';
 
     /* Write HTTP Header */
     fprintf(r->stream, "HTTP/1.0 %s\n", status_string);
     fprintf(r->stream, "Content-Type: text/html\n");
     fprintf(r->stream, "\r\n");
 
+    /* Write head part*/
+    fprintf(r->stream, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n");
+    fprintf(r->stream, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css\" integrity=\"sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh\" crossorigin=\"anonymous\">");
+
     /* Write HTML Description of Error*/
-    fprintf(r->stream, "<h1>%s</h1>\n", status_string);
+    fprintf(r->stream, "<div class=\"page-wrap d-flex flex-row align-items-center\">\n");
+    fprintf(r->stream, "<div class=\"container\">\n");
+    fprintf(r->stream, "<div class=\"row justify-content-center\">");
+    fprintf(r->stream, "<div class=\"col-md-12 text-center\">");
+    fprintf(r->stream, "<span class=\"display-1 d-block\">%s</span>\n", number);
+    fprintf(r->stream, "<div class=\"mb-4 lead\">%s</div>\n", word);
+    fprintf(r->stream, "<a href=\"/\" class=\"btn btn-link\">Back to Home</a>");
+    fprintf(r->stream, "</div>\n");
+    fprintf(r->stream, "</div>\n");
+    fprintf(r->stream, "</div>\n");
+    fprintf(r->stream, "</div>\n");
+
+    free(number);
 
     /* Return specified status */
     return status;
