@@ -229,7 +229,7 @@ Status  handle_cgi_request(Request *r) {
     }
 
     /* Close popen, return OK */
-    fclose(pfs);
+    pclose(pfs);
     return HTTP_STATUS_OK;
 }
 
