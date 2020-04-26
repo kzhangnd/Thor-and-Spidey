@@ -62,6 +62,7 @@ char * determine_mimetype(const char *path) {
         }
     }
 
+    fclose(fs);
     return strdup(DefaultMimeType);
 }
 
