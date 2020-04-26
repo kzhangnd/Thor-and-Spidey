@@ -114,18 +114,32 @@ Status  handle_browse_request(Request *r) {
 
     char buffer[BUFSIZ];
     for (int i = 0; i < n; i++) {
-        if (!streq(entries[i]->d_name, ".")) {
-            if (r->uri[strlen(r->uri) - 1] == '/')
-                sprintf(buffer, "%s%s", r->uri, entries[i]->d_name);
-            else
-                sprintf(buffer, "%s/%s", r->uri, entries[i]->d_name);
+        if (streq(entries[i]->d_name, ".")) {
+            free(entries[i]);
+            continue;
+        }
 
-            if (streq(entries[i]->d_name, "..")){
-                fprintf(r->stream, "<a href=\"%s\" class=\"list-group-item list-group-item-action list-group-item-info\">%s</a>\n", buffer, entries[i]->d_name);
+        if (r->uri[strlen(r->uri) - 1] == '/')
+            sprintf(buffer, "%s%s", r->uri, entries[i]->d_name);
+        else
+            sprintf(buffer, "%s/%s", r->uri, entries[i]->d_name);
+
+        if (streq(entries[i]->d_name, ".."))
+            fprintf(r->stream, "<a href=\"%s\" class=\"list-group-item list-group-item-action list-group-item-info\">%s</a>\n", buffer, entries[i]->d_name);
+        else {
+            /* Check if the file is an image*/
+            char *mimetype = determine_mimetype(entries[i]->d_name);
+            if (strncmp(mimetype, "image", 5) == 0) {
+                fprintf(r->stream, "<a href=\"%s\" class = \"list-group-item list-group-item-action list-group-item-primary\">%s\n", buffer, entries[i]->d_name);
+                fprintf(r->stream, "<img src = \"%s\" class=\"img-thumbnail\" alt = \"%s\">\n", buffer, entries[i]->d_name);
+                fprintf(r->stream, "</a>");
             }
+            /* Display item name*/
             else
                 fprintf(r->stream, "<a href=\"%s\" class=\"list-group-item list-group-item-action list-group-item-primary\">%s</a>\n", buffer, entries[i]->d_name);
+            free(mimetype);
         }
+
      	free(entries[i]);
     }
     fprintf(r->stream, "</div>\n");
