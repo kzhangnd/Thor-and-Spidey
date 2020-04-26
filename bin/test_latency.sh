@@ -17,8 +17,8 @@ cleanup() {
 
 check_status() {
     if [ $1 -ne $2 ]; then
-	echo "FAILURE: exit status $1 != $2" > $WORKSPACE/test
-	return 1;
+	  echo "FAILURE: exit status $1 != $2" > $WORKSPACE/test
+	  return 1;
     fi
 
     return 0;
@@ -70,9 +70,9 @@ echo "Testing latency on $HOST:$PORT ..."
 
 # ------------------------------------------------------------------------------
 
-printf "\n %-64s\n" "Directory listings"
+printf "\n%-64s\n" "Directory listings ..."
 
-./$PROGRAM -t 5 -h 5 $HOST:$PORT/ > $WORKSPACE/test
+./$PROGRAM -t 10 -h 10 $HOST:$PORT/ > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -82,9 +82,9 @@ fi
 
 # ------------------------------------------------------------------------------
 
-printf "\n %-64s\n" "Static files"
+printf "\n%-64s\n" "Static files ..."
 
-./$PROGRAM -t 5 -h 5 $HOST:$PORT/song.txt > $WORKSPACE/test
+./$PROGRAM -t 10 -h 10 $HOST:$PORT/song.txt > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -94,9 +94,9 @@ fi
 
 # ------------------------------------------------------------------------------
 
-printf "\n %-64s\n" "CGI scripts"
+printf "\n%-64s\n" "CGI scripts ..."
 
-./$PROGRAM -t 5 -h 5 $HOST:$PORT/scripts/cowsay.sh > $WORKSPACE/test
+./$PROGRAM -t 10 -h 10 $HOST:$PORT/scripts/cowsay.sh > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
