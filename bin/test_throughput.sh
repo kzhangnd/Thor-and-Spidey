@@ -72,7 +72,7 @@ echo "Testing throughput on $HOST:$PORT ..."
 
 printf "\n%-64s\n" "Testing small static files: 1KB .."
 
-./$PROGRAM -t 10 -h 10 $HOST:$PORT/file_small > $WORKSPACE/test
+./$PROGRAM -t 10 -h 10 $HOST:$PORT/small.txt > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -83,7 +83,7 @@ fi
 
 printf "\n%-64s\n" "Testing medium static files: 1MB ..."
 
-./$PROGRAM -t 10 -h 10 $HOST:$PORT/file_medium > $WORKSPACE/test
+./$PROGRAM -t 10 -h 10 $HOST:$PORT/medium.txt > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -94,7 +94,7 @@ fi
 
 printf "\n%-64s\n" "Testing large static files: 1GB ..."
 
-./$PROGRAM -t 5 -h 5 $HOST:$PORT/file_large > $WORKSPACE/test
+./$PROGRAM -t 5 -h 5 $HOST:$PORT/large.txt > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else

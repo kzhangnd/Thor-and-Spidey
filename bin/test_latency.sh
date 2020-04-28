@@ -72,7 +72,7 @@ echo "Testing latency on $HOST:$PORT ..."
 
 printf "\n%-64s\n" "Directory listings ..."
 
-./$PROGRAM -t 10 -h 10 $HOST:$PORT/ > $WORKSPACE/test
+./$PROGRAM -t 100 -h 10 $HOST:$PORT/ > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -84,7 +84,7 @@ fi
 
 printf "\n%-64s\n" "Static files ..."
 
-./$PROGRAM -t 10 -h 10 $HOST:$PORT/song.txt > $WORKSPACE/test
+./$PROGRAM -t 100 -h 10 $HOST:$PORT/song.txt > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
@@ -96,7 +96,7 @@ fi
 
 printf "\n%-64s\n" "CGI scripts ..."
 
-./$PROGRAM -t 10 -h 10 $HOST:$PORT/scripts/cowsay.sh > $WORKSPACE/test
+./$PROGRAM -t 100 -h 10 $HOST:$PORT/scripts/cowsay.sh > $WORKSPACE/test
 if ! check_status $? 0; then
     error "Failure"
 else
