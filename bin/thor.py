@@ -28,7 +28,7 @@ def hammer(url, throws, verbose, hid):
     Return the average elapsed time of all the throws.
     '''
 
-    sum = 0.0
+    sum = 0.0000000
 
     for i in range(throws):
         start_time = time.time()
@@ -42,10 +42,10 @@ def hammer(url, throws, verbose, hid):
             print(response.text)
 
         # Print out the elapsed time of a single throw
-        print('Hammer:  {}, Throw:   {}, Elapsed Time: {:.2f}'.format(hid, i, duration))
+        print('Hammer:  {}, Throw:   {}, Elapsed Time: {:.6f}'.format(hid, i, duration))
 
     # Print out the averaged time of a hammer
-    print('Hammer:  {}, AVERAGE   , Elapsed Time: {:.2f}'.format(hid, sum/throws))
+    print('Hammer:  {}, AVERAGE   , Elapsed Time: {:.6f}'.format(hid, sum/throws))
 
     return sum/throws
 
@@ -88,7 +88,7 @@ def main():
         runtime = executor.map(do_hammer, args)
 
     # Print out the total average time
-    print('TOTAL AVERAGE ELAPSED TIME: {:.2f}'.format(sum(runtime)/hammers))
+    print('TOTAL AVERAGE ELAPSED TIME: {:.6f}'.format(sum(runtime)/hammers))
 
 
 # Main execution
