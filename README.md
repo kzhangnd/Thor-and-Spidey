@@ -19,7 +19,21 @@ This is the [Final Project] for [CSE 20289 Systems Programming (Spring 2020)].
 
 ## Contributions
 
-Enumeration of the contributions of each group member.
+Kai Zhang:
+- request.c
+- handler.c
+- utils.c
+- spidey.c
+- cif.py
+
+Chang Zhou:
+- thor.py
+- socket.c
+- single.c
+- forking.c
+- test_latency.sh
+- test_throughput.sh
+
 
 [Final Project]: https://www3.nd.edu/~pbui/teaching/cse.20289.sp20/project.html
 [CSE 20289 Systems Programming (Spring 2020)]: https://www3.nd.edu/~pbui/teaching/cse.20289.sp20/
