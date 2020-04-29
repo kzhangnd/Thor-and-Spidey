@@ -172,8 +172,8 @@ Status  handle_file_request(Request *r) {
     /* Open file for reading */
     fs = fopen(r->path, "r");
     if (!fs) {
-    	debug("fopen: %s\n", strerror(errno));
-    	goto fail;
+    	debug("fopen: %s", strerror(errno));
+    	return HTTP_STATUS_NOT_FOUND;
     }
 
     /* Determine mimetype */
@@ -187,7 +187,10 @@ Status  handle_file_request(Request *r) {
     /* Read from file and write to socket in chunks */
     nread = fread(buffer, 1, BUFSIZ, fs);
     while (nread > 0) {
-        fwrite(buffer, 1, nread, r->stream);
+        if (fwrite(buffer, 1, nread, r->stream) != nread) {
+            debug("Unable to open file");
+            goto fail;
+        }
         nread = fread(buffer, 1, BUFSIZ, fs);
     }
 
