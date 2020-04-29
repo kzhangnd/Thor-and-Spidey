@@ -9,8 +9,8 @@ This is the [Final Project] for [CSE 20289 Systems Programming (Spring 2020)].
 
 ## Demonstration
 
-  To be added later
-- [Link to Demonstration Video]()
+- [Link to Main Demonstration Video]
+- [Link to Guru Points Video]
 
 ## Errata
 
@@ -26,6 +26,7 @@ Kai Zhang:
 - spidey.c
 - cif.py
 
+
 Chang Zhou:
 - thor.py
 - socket.c
@@ -37,3 +38,5 @@ Chang Zhou:
 
 [Final Project]: https://www3.nd.edu/~pbui/teaching/cse.20289.sp20/project.html
 [CSE 20289 Systems Programming (Spring 2020)]: https://www3.nd.edu/~pbui/teaching/cse.20289.sp20/
+[Link to Main Demonstration Video]: https://youtu.be/SZKTTjMyuIM
+[Link to Guru Points Video]: https://youtu.be/sES9rAJyyP0
